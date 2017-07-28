@@ -1,24 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.ontime.multiscreeendemo">
+
     <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.BLUETOOTH"/>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+
+    <uses-permission-sdk-23 android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
     <application
+        android:name=".bean.MyApplication"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="ShoeDemo"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
-        <activity android:name=".MainActivity"
+        <activity
+            android:name=".activity.MainActivity"
             android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="design_width"
+            android:value="1920"/>
+        <meta-data
+            android:name="design_height"
+            android:value="1080"/>
+
+        <activity android:name=".activity.SecondActivity"
+            android:screenOrientation="landscape">
 
         </activity>
-        <meta-data android:name="design_width" android:value="1920"></meta-data>
-        <meta-data android:name="design_height" android:value="1080"></meta-data>
+
+        <activity android:name=".activity.ThirdActivity"
+            android:screenOrientation="landscape">
+
+        </activity>
     </application>
 
 </manifest>
