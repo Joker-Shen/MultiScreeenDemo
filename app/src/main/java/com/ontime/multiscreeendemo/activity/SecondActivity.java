@@ -96,7 +96,7 @@ public class SecondActivity extends AutoLayoutActivity {
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                        Toast.makeText(SecondActivity.this, "fail", Toast.LENGTH_SHORT).show();
+                      //  Toast.makeText(SecondActivity.this, "fail", Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case 2:
@@ -215,6 +215,7 @@ public class SecondActivity extends AutoLayoutActivity {
                             @Override
                             public void onError(Throwable ex, boolean isOnCallback) {
                                 Toast.makeText(SecondActivity.this, "无网络连接！", Toast.LENGTH_SHORT).show();
+
                             }
 
                             @Override

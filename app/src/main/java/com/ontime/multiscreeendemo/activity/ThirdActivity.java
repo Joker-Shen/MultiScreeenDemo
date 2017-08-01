@@ -212,6 +212,7 @@ public class ThirdActivity extends AutoLayoutActivity {
                             @Override
                             public void onError(Throwable ex, boolean isOnCallback) {
                                 Toast.makeText(ThirdActivity.this, "无网络连接！", Toast.LENGTH_SHORT).show();
+
                             }
 
                             @Override

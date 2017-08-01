@@ -18,9 +18,9 @@ public class MyBroadcastReciever extends BroadcastReceiver {
         ConnectivityManager connectivityManager = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo.State state = connectivityManager.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
         if(state == NetworkInfo.State.CONNECTED){
-            Toast.makeText(context, "Wifi已连接", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "Wifi已连接", Toast.LENGTH_SHORT).show();
         }else{
-            Toast.makeText(context, "无网络连接", Toast.LENGTH_SHORT).show();
+            //Toast.makeText(context, "无网络连接", Toast.LENGTH_SHORT).show();
         }
     }
 }
