@@ -25,6 +25,7 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.ontime.multiscreeendemo.R;
+import com.ontime.multiscreeendemo.bean.MyApplication;
 import com.ontime.multiscreeendemo.broadcastReciever.MyBroadcastReciever;
 import com.zhy.autolayout.AutoLayoutActivity;
 
@@ -34,28 +35,16 @@ import org.xutils.common.Callback;
 import org.xutils.http.RequestParams;
 import org.xutils.x;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
-
-import static com.ontime.multiscreeendemo.R.id.tv_count_time;
-
 public class SecondActivity extends AutoLayoutActivity {
-
     private MyCount myCount;
     //鞋子缩放动画
     private ScaleAnimation scaleAnimation;
     //鞋子
-    private ImageView ivShoe;
+    private ImageView ivShoeBlue;
     //鞋子动画集
     private AnimationSet animationSet;
 
@@ -67,18 +56,17 @@ public class SecondActivity extends AutoLayoutActivity {
     private TextView tvCountTime;
     private Thread thread;
 
+    private MyApplication myApplication ;
 
     private Bitmap bitmap;
 
     private Runnable mRunnable;
 
     private Timer timer;
-
     private Timer timer1;
 
     private Boolean flag = false;
 
-    private MyBroadcastReciever myBroadcastReciever;
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -86,40 +74,41 @@ public class SecondActivity extends AutoLayoutActivity {
             switch (msg.what){
                 case 1:
                     String str = msg.obj.toString()+"";
-                    //Log.i("SecondActivity",str);
                     try {
                         JSONObject jObj = new JSONObject(str);
                         String result = jObj.optString("data");
                         if(result.equals("true")){
-                           // Log.i("03003c31++++++",str);
+                            //Log.i("03003c39++++++",str);
                             startAnimationSet();
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
-                      //  Toast.makeText(SecondActivity.this, "fail", Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case 2:
-                    flag = (Boolean) msg.obj;
+                     flag = (Boolean) msg.obj;
                     if(flag == true){
                         tvCountTime.setVisibility(View.VISIBLE);
                     }
-
             }
         }
     };
+
+    private MyBroadcastReciever myBroadcastReciever;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);// 去掉标题栏
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);// 去掉信息栏
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);// 隐藏状态栏
         setContentView(R.layout.activity_second);
 
+        myApplication = new MyApplication();
 
         myCount = new MyCount(20*1000,1000);
+
         tvCountTime = (TextView) findViewById(R.id.tv_count_time);
         ivQrCode = (ImageView) findViewById(R.id.iv_qrcode);
-        ivShoe = (ImageView) findViewById(R.id.iv_shoes);
+        ivShoeBlue = (ImageView) findViewById(R.id.iv_shoes_blue);
         tvCountTime.setVisibility(View.GONE);
         timer1 = new Timer();
         timer1.schedule(new TimerTask() {
@@ -132,10 +121,8 @@ public class SecondActivity extends AutoLayoutActivity {
                 handler.sendMessage(message);
             }
         },5000);
-
-
         try {
-            bitmap = createQRCode("http://139.224.104.4:8082/ISHWT/First?param="+"03003c31"+"&type=0");
+            bitmap = createQRCode("http://139.224.104.4:8082/ISHWT/First?param="+myApplication.getSecondAcitivty_DeviceId()+"&type=0");
         } catch (WriterException e) {
             e.printStackTrace();
         }
@@ -152,10 +139,10 @@ public class SecondActivity extends AutoLayoutActivity {
         mRunnable = new Runnable() {
             @Override
             public void run() {
-                timer.schedule(new TimerTask() {
+               timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                            String target = "http://139.224.104.4:8082/ISHWT/Second?param=" + "03003c31" + "&type=1";
+                            String target = "http://139.224.104.4:8082/ISHWT/Second?param="+myApplication.getSecondAcitivty_DeviceId() + "&type=1";
 //                            OkHttpClient client;
 //                            InputStreamReader in = null;
 //                            BufferedReader buffer = null;
@@ -205,7 +192,7 @@ public class SecondActivity extends AutoLayoutActivity {
                         x.http().get(requestParams, new Callback.CommonCallback<String>() {
                             @Override
                             public void onSuccess(String result) {
-                                Log.i("SecondActivity",result);
+
                                 Message message = handler.obtainMessage();
                                 message.what = 1;
                                 message.obj = result;
@@ -214,8 +201,7 @@ public class SecondActivity extends AutoLayoutActivity {
 
                             @Override
                             public void onError(Throwable ex, boolean isOnCallback) {
-                                Toast.makeText(SecondActivity.this, "无网络连接！", Toast.LENGTH_SHORT).show();
-
+                               // Toast.makeText(SecondActivity.this, "无网络连接！", Toast.LENGTH_SHORT).show();
                             }
 
                             @Override
@@ -245,7 +231,7 @@ public class SecondActivity extends AutoLayoutActivity {
 
 
 
-    //生成二
+    //生成二维码
     public static Bitmap createQRCode(String str) throws WriterException {
         Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
         hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
@@ -286,7 +272,7 @@ public class SecondActivity extends AutoLayoutActivity {
         //将平移动画加入至动画集中
         animationSet.addAnimation(translateAnimation);
 
-        ivShoe.startAnimation(animationSet);
+        ivShoeBlue.startAnimation(animationSet);
     }
 
 
@@ -307,7 +293,6 @@ public class SecondActivity extends AutoLayoutActivity {
         @Override
         public void onTick(long millisUntilFinished) {
             tvCountTime.setText(millisUntilFinished/1000+"");
-
         }
 
         @Override
@@ -318,7 +303,6 @@ public class SecondActivity extends AutoLayoutActivity {
             SecondActivity.this.finish();
         }
     }
-
 
     @Override
     protected void onPause() {
@@ -344,36 +328,6 @@ public class SecondActivity extends AutoLayoutActivity {
         super.onRestart();
         Log.i("SecondActivity","onRestart");
     }
-
-    @Override
-    protected void onDestroy() {
-        if(thread!=null){
-            thread = null;
-        }
-        Log.i("SecondActivity","onDestroy");
-        myCount.cancel();
-        if(bitmap !=null && !bitmap.isRecycled()){
-            bitmap.recycle();
-            bitmap = null;
-        }
-        System.gc();
-        timer.cancel();
-
-        if(timer!=null){
-            timer = null;
-        }
-
-        if(myCount!=null){
-            myCount = null;
-        }
-        super.onDestroy();
-
-        if(timer1!=null){
-            timer1 = null;
-        }
-
-        unregisterReceiver(myBroadcastReciever);
-    }
     @Override
     protected void onStart() {
         super.onStart();
@@ -381,6 +335,31 @@ public class SecondActivity extends AutoLayoutActivity {
     }
 
 
+    @Override
+    protected void onDestroy() {
+        if(thread!=null){
+            thread = null;
+        }
+        myCount.cancel();
+        if(bitmap !=null && !bitmap.isRecycled()){
+            bitmap.recycle();
+            bitmap = null;
+        }
+        System.gc();
+        timer.cancel() ;
+        if(timer!=null){
+            timer = null;
+        }
+
+        if(myCount !=null){
+            myCount = null;
+        }
+        super.onDestroy();
+        unregisterReceiver(myBroadcastReciever);
+
+        if(timer1!=null){
+            timer1 = null;
+        }
+    }
 
 }
-

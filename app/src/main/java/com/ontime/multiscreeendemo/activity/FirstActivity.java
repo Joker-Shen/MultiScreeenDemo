@@ -1,14 +1,17 @@
 package com.ontime.multiscreeendemo.activity;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.MutableContextWrapper;
 import android.graphics.Bitmap;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Bundle;
+import android.text.Layout;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -16,6 +19,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.view.animation.ScaleAnimation;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,6 +30,7 @@ import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
 import com.google.zxing.common.BitMatrix;
 import com.ontime.multiscreeendemo.R;
+import com.ontime.multiscreeendemo.bean.MyApplication;
 import com.ontime.multiscreeendemo.broadcastReciever.MyBroadcastReciever;
 import com.zhy.autolayout.AutoLayoutActivity;
 
@@ -35,27 +40,19 @@ import org.xutils.common.Callback;
 import org.xutils.http.RequestParams;
 import org.xutils.x;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
+public class FirstActivity extends AutoLayoutActivity {
 
-import static com.ontime.multiscreeendemo.R.id.tv_count_time;
-
-public class ThirdActivity extends AutoLayoutActivity {
+    private MyApplication myApplication;
+    private Toast mToast;
     private MyCount myCount;
     //鞋子缩放动画
     private ScaleAnimation scaleAnimation;
     //鞋子
-    private ImageView ivShoeBlue;
+    private ImageView ivShoe;
     //鞋子动画集
     private AnimationSet animationSet;
 
@@ -73,9 +70,14 @@ public class ThirdActivity extends AutoLayoutActivity {
     private Runnable mRunnable;
 
     private Timer timer;
+
     private Timer timer1;
 
     private Boolean flag = false;
+
+    private MyBroadcastReciever myBroadcastReciever;
+
+    private EditText etDeviceId;
     private Handler handler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -83,19 +85,21 @@ public class ThirdActivity extends AutoLayoutActivity {
             switch (msg.what){
                 case 1:
                     String str = msg.obj.toString()+"";
+                    //Log.i("FirstActivity",str);
                     try {
                         JSONObject jObj = new JSONObject(str);
                         String result = jObj.optString("data");
                         if(result.equals("true")){
-                            //Log.i("03003c39++++++",str);
+                           // Log.i("03003c31++++++",str);
                             startAnimationSet();
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
+                      //  Toast.makeText(FirstActivity.this, "fail", Toast.LENGTH_SHORT).show();
                     }
                     break;
                 case 2:
-                     flag = (Boolean) msg.obj;
+                    flag = (Boolean) msg.obj;
                     if(flag == true){
                         tvCountTime.setVisibility(View.VISIBLE);
                     }
@@ -103,21 +107,52 @@ public class ThirdActivity extends AutoLayoutActivity {
             }
         }
     };
-
-    private MyBroadcastReciever myBroadcastReciever;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         requestWindowFeature(Window.FEATURE_NO_TITLE);// 去掉标题栏
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);// 去掉信息栏
-        setContentView(R.layout.activity_third);
+        setContentView(R.layout.activity_first);
+        myApplication = new MyApplication();
 
         myCount = new MyCount(20*1000,1000);
-
-
         tvCountTime = (TextView) findViewById(R.id.tv_count_time);
         ivQrCode = (ImageView) findViewById(R.id.iv_qrcode);
-        ivShoeBlue = (ImageView) findViewById(R.id.iv_shoes_blue);
+        ivShoe = (ImageView) findViewById(R.id.iv_shoes);
+
+        final View inflateView = LayoutInflater.from(this).inflate(R.layout.dialog_view,null);
+        etDeviceId = (EditText) inflateView.findViewById(R.id.etDeviceID);
+
+
+
+        //切换绑定标签
+        ivShoe.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                AlertDialog dialog = new AlertDialog.Builder(FirstActivity.this)
+                        .setTitle("提示")
+                        .setView(inflateView)
+                        .setMessage("请输入DeviceId:")
+                        .setPositiveButton("确认", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                String deviceId = etDeviceId.getText().toString();
+                                //Log.i("deviceId",deviceId);
+                                myApplication.setFirstActivity_DeviceId(deviceId);
+                                Toast.makeText(FirstActivity.this, "标签绑定成功", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .setNegativeButton("取消", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                Toast.makeText(FirstActivity.this, "取消", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .create();
+                dialog.show();
+                return false;
+            }
+        });
         tvCountTime.setVisibility(View.GONE);
         timer1 = new Timer();
         timer1.schedule(new TimerTask() {
@@ -131,8 +166,9 @@ public class ThirdActivity extends AutoLayoutActivity {
             }
         },5000);
 
+
         try {
-            bitmap = createQRCode("http://139.224.104.4:8082/ISHWT/First?param="+"03003c39"+"&type=0");
+            bitmap = createQRCode("http://139.224.104.4:8082/ISHWT/First?param="+myApplication.getFirstActivity_DeviceId()+"&type=0");
         } catch (WriterException e) {
             e.printStackTrace();
         }
@@ -149,10 +185,10 @@ public class ThirdActivity extends AutoLayoutActivity {
         mRunnable = new Runnable() {
             @Override
             public void run() {
-               timer.schedule(new TimerTask() {
+                timer.schedule(new TimerTask() {
                     @Override
                     public void run() {
-                            String target = "http://139.224.104.4:8082/ISHWT/Second?param=" + "03003c39" + "&type=1";
+                            String target = "http://139.224.104.4:8082/ISHWT/Second?param=" + myApplication.getFirstActivity_DeviceId() + "&type=1";
 //                            OkHttpClient client;
 //                            InputStreamReader in = null;
 //                            BufferedReader buffer = null;
@@ -165,7 +201,7 @@ public class ThirdActivity extends AutoLayoutActivity {
 //                                if (response.isSuccessful()) {
 //                                    in = new InputStreamReader(response.body().byteStream());
 //                                }else{
-//                                    Toast.makeText(ThirdActivity.this, "网络出现问题", Toast.LENGTH_SHORT).show();
+//                                    Toast.makeText(FirstActivity.this, "网络出现问题", Toast.LENGTH_SHORT).show();
 //                                    return;
 //                                }
 //                                buffer = new BufferedReader(in);
@@ -200,18 +236,20 @@ public class ThirdActivity extends AutoLayoutActivity {
 //                            handler.sendMessage(message);
                         RequestParams requestParams = new RequestParams(target);
                         x.http().get(requestParams, new Callback.CommonCallback<String>() {
+
                             @Override
                             public void onSuccess(String result) {
-                                Log.i("SecondActivity",result);
                                 Message message = handler.obtainMessage();
                                 message.what = 1;
                                 message.obj = result;
                                 handler.sendMessage(message);
+
                             }
 
                             @Override
                             public void onError(Throwable ex, boolean isOnCallback) {
-                                Toast.makeText(ThirdActivity.this, "无网络连接！", Toast.LENGTH_SHORT).show();
+//                                mToast = Toast.makeText(FirstActivity.this, "无网络连接！", Toast.LENGTH_SHORT);
+//                                mToast.show();
 
                             }
 
@@ -242,7 +280,7 @@ public class ThirdActivity extends AutoLayoutActivity {
 
 
 
-    //生成二维码
+    //生成二
     public static Bitmap createQRCode(String str) throws WriterException {
         Hashtable<EncodeHintType, String> hints = new Hashtable<EncodeHintType, String>();
         hints.put(EncodeHintType.CHARACTER_SET, "utf-8");
@@ -277,13 +315,13 @@ public class ThirdActivity extends AutoLayoutActivity {
         //将缩放动画添加至动画集中
         animationSet.addAnimation(scaleAnimation);
         //加载平移动画
-        Animation translateAnimation = AnimationUtils.loadAnimation(ThirdActivity.this,R.anim.translate);
+        Animation translateAnimation = AnimationUtils.loadAnimation(FirstActivity.this,R.anim.translate);
 
         translateAnimation.setDuration(1500);
         //将平移动画加入至动画集中
         animationSet.addAnimation(translateAnimation);
 
-        ivShoeBlue.startAnimation(animationSet);
+        ivShoe.startAnimation(animationSet);
     }
 
 
@@ -304,73 +342,80 @@ public class ThirdActivity extends AutoLayoutActivity {
         @Override
         public void onTick(long millisUntilFinished) {
             tvCountTime.setText(millisUntilFinished/1000+"");
+
         }
 
         @Override
         public void onFinish() {
             handler.removeCallbacks(mRunnable);
-            Intent intent = new Intent(ThirdActivity.this, MainActivity.class);
+            Intent intent = new Intent(FirstActivity.this, MainActivity.class);
             startActivity(intent);
-            ThirdActivity.this.finish();
+            FirstActivity.this.finish();
         }
     }
+
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.i("ThirdActivity","OnPause");
+        Log.i("FirstActivity","OnPause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.i("ThirdActivity","onStop");
+        Log.i("FirstActivity","onStop");
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i("ThirdActivity","onResume");
+        Log.i("FirstActivity","onResume");
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.i("ThirdActivity","onRestart");
+        Log.i("FirstActivity","onRestart");
     }
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.i("ThirdActivity","onStart");
-    }
-
 
     @Override
     protected void onDestroy() {
         if(thread!=null){
             thread = null;
         }
+        Log.i("FirstActivity","onDestroy");
         myCount.cancel();
         if(bitmap !=null && !bitmap.isRecycled()){
             bitmap.recycle();
             bitmap = null;
         }
         System.gc();
-        timer.cancel() ;
+        timer.cancel();
+
         if(timer!=null){
             timer = null;
         }
 
-        if(myCount !=null){
+        if(myCount!=null){
             myCount = null;
         }
         super.onDestroy();
-        unregisterReceiver(myBroadcastReciever);
 
         if(timer1!=null){
             timer1 = null;
         }
+
+        unregisterReceiver(myBroadcastReciever);
+    }
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.i("FirstActivity","onStart");
     }
 
+
+
 }
+

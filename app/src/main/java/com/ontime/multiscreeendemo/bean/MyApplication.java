@@ -12,6 +12,25 @@ import org.xutils.x;
  */
 
 public class MyApplication extends Application implements Thread.UncaughtExceptionHandler{
+    private static  String FirstActivity_DeviceId = "03003c75";
+    private static  String SecondAcitivty_DeviceId = "03003c30";
+    //    private static  String TestId = "03003c4d";
+
+    public String getFirstActivity_DeviceId() {
+        return FirstActivity_DeviceId;
+    }
+
+    public void setFirstActivity_DeviceId(String firstActivity_DeviceId) {
+        FirstActivity_DeviceId = firstActivity_DeviceId;
+    }
+
+    public String getSecondAcitivty_DeviceId() {
+        return SecondAcitivty_DeviceId;
+    }
+
+    public void setSecondAcitivty_DeviceId(String secondAcitivty_DeviceId) {
+        SecondAcitivty_DeviceId = secondAcitivty_DeviceId;
+    }
 
     @Override
     public void onCreate() {

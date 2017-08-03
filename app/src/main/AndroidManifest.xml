@@ -35,12 +35,12 @@
             android:name="design_height"
             android:value="1080"/>
 
-        <activity android:name=".activity.SecondActivity"
+        <activity android:name=".activity.FirstActivity"
             android:screenOrientation="landscape">
 
         </activity>
 
-        <activity android:name=".activity.ThirdActivity"
+        <activity android:name=".activity.SecondActivity"
             android:screenOrientation="landscape">
 
         </activity>

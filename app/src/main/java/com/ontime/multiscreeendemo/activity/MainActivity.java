@@ -24,9 +24,12 @@ import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.ontime.multiscreeendemo.R;
+import com.ontime.multiscreeendemo.bean.MyApplication;
 import com.ontime.multiscreeendemo.broadcastReciever.MyBroadcastReciever;
 import com.zhy.autolayout.AutoLayoutActivity;
 
+
+import java.util.Arrays;
 
 import static com.ontime.multiscreeendemo.R.id.tv_count_time;
 
@@ -72,7 +75,6 @@ public class MainActivity extends AutoLayoutActivity {
 //        }else{
 //            Toast.makeText(this, "此设备支持BLE~", Toast.LENGTH_SHORT).show();
 //        }
-
 
         //获取BluetoothAdapter;
         final BluetoothManager mBluetoothManager = (BluetoothManager) getSystemService(BLUETOOTH_SERVICE);
@@ -195,25 +197,68 @@ public class MainActivity extends AutoLayoutActivity {
     private BluetoothAdapter.LeScanCallback mLeScanCallback = new BluetoothAdapter.LeScanCallback() {
         @Override
         public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
+            Log.i("scanRecord", Arrays.toString(scanRecord));
+            byte[] myRecord = Arrays.copyOfRange(scanRecord,12,16);
+            //Log.i("myRecord", Arrays.toString(myRecord));
 
-            if(scanRecord[0] == 2 && scanRecord[15] == 57){
-                Intent intent = new Intent(MainActivity.this,ThirdActivity.class);
+            String strFirst = new MyApplication().getFirstActivity_DeviceId();
+            String strSecond = new MyApplication().getSecondAcitivty_DeviceId();
+
+            byte[] byteArrayFirst = new byte[strFirst.length()/2];
+            for(int i=0;i<byteArrayFirst.length;i++){
+                String subStr = strFirst.substring(2*i,2*i+2);
+                byteArrayFirst[i] = (byte) Integer.parseInt(subStr,16);
+            }
+            byte[] byteArraySecond = new byte[strFirst.length()/2];
+            for(int i=0;i<byteArraySecond.length;i++){
+                String subStr = strSecond.substring(2*i,2*i+2);
+                byteArraySecond[i] = (byte) Integer.parseInt(subStr,16);
+            }
+//            byte[] byteArrayTest = new byte[strFirst.length()/2];
+//            for(int i=0;i<byteArraySecond.length;i++){
+//                String subStr = StrTest.substring(2*i,2*i+2);
+//                byteArrayTest[i] = (byte) Integer.parseInt(subStr,16);
+//            }
+
+//            if( Arrays.equals(myRecord,byteArray)){
+//                Intent intent = new Intent(MainActivity.this,SecondActivity.class);
+//                startActivity(intent);
+//                bleStopScan();
+//                MainActivity.this.finish();
+//
+//            }
+//
+//            if( Arrays.equals(myRecord,byteArrayTest)){
+//                Intent intent = new Intent(MainActivity.this,FirstActivity.class);
+//                startActivity(intent);
+//                bleStopScan();
+//                MainActivity.this.finish();
+//            }
+
+
+            //03003C75  绿色鞋子
+            if( Arrays.equals(myRecord,byteArrayFirst)){
+                Intent intent = new Intent(MainActivity.this,FirstActivity.class);
                 startActivity(intent);
                 bleStopScan();
                 MainActivity.this.finish();
             }
 
-            if(scanRecord[0] == 2&& scanRecord[15] == 49){
+            //03003c30   蓝色鞋子
+            if( Arrays.equals(myRecord,byteArraySecond)){
                 Intent intent = new Intent(MainActivity.this,SecondActivity.class);
                 startActivity(intent);
                 bleStopScan();
                 MainActivity.this.finish();
-
             }
 //            Log.i("扫描记录", Arrays.toString(scanRecord));
 //            Log.i("Tag","搜索到设备： 设备名 = "+deviceName+"，设备Mac地址 = "+deviceAddr+",信号强度 ="+rssi+",uuid ="+uuids);
         }
+
+
     };
+
+
 
 
     public void startAnimationSet(){
@@ -230,13 +275,12 @@ public class MainActivity extends AutoLayoutActivity {
         //TranslateAnimation translateAnimation = new TranslateAnimation(0,-100,0,150);
         //设置平移动画时长
         translateAnimation.setDuration(1500);
+
         //将平移动画加入至动画集中
         animationSet.addAnimation(translateAnimation);
         ivShoe.startAnimation(animationSet);
+
         //animationSet.setFillAfter(true);
         //animationSet.setFillBefore(true);
     }
-
-
-
 }
